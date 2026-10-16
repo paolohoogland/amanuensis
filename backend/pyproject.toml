@@ -6,7 +6,10 @@ authors = [
     { name = "phoogland", email = "paolo.hoogland@etu.unistra.fr" }
 ]
 requires-python = ">=3.11,<3.12"
-dependencies = []
+dependencies = [
+    "demucs>=4.1.0",
+    "numpy>=2.4.6",
+]
 
 [dependency-groups]
 dev = [
@@ -35,3 +38,9 @@ select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RUF"]
 strict = true
 mypy_path = "src"
 packages = ["amanuensis"]
+
+[tool.uv]
+environments = [
+    "sys_platform == 'darwin' and platform_machine == 'arm64'",
+    "sys_platform == 'linux' and platform_machine == 'x86_64'",
+]
