@@ -1,0 +1,33 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 48rem;
+  padding: 2rem 1rem;
+}
+
+section[aria-label='Mixer'] ul {
+  list-style: none;
+  padding: 0;
+}
+
+section[aria-label='Mixer'] li {
+  display: grid;
+  grid-template-columns: 6rem auto auto 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  padding-block: 0.25rem;
+}
+
+button[aria-pressed='true'] {
+  font-weight: bold;
+  outline: 2px solid currentColor;
+}
+
+input[aria-label='Position'] {
+  width: 60%;
+  vertical-align: middle;
+}
