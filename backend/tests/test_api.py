@@ -5,17 +5,19 @@ from fastapi.testclient import TestClient
 
 from amanuensis.api import create_app
 from amanuensis.separation import SeparationService, Separator
+from tests.wav import write_tone
 
 
 class FakeSeparator:
-    def __init__(self) -> None:
+    def __init__(self, amplitudes: dict[str, float] | None = None) -> None:
+        self.amplitudes = amplitudes or {"drums": 0.3, "guitar": 0.3}
         self.received: list[bytes] = []
 
     def separate(self, source: Path, target: Path) -> list[str]:
         self.received.append(source.read_bytes())
-        for name in ("drums", "guitar"):
-            (target / f"{name}.wav").write_bytes(f"{name}-audio".encode())
-        return ["drums", "guitar"]
+        for name, amplitude in self.amplitudes.items():
+            write_tone(target / f"{name}.wav", amplitude, seconds=0.1)
+        return list(self.amplitudes)
 
 
 class FailingSeparator:
@@ -65,14 +67,26 @@ def test_finished_separation_lists_its_stems(client: TestClient) -> None:
     }
 
 
-def test_serves_stem_audio(client: TestClient) -> None:
+def test_serves_stem_audio(client: TestClient, tmp_path: Path) -> None:
     separation_id = upload(client)
 
     response = client.get(f"/separations/{separation_id}/stems/guitar")
 
+    stem_file = tmp_path / "separations" / separation_id / "stems" / "guitar.wav"
     assert response.status_code == 200
     assert response.headers["content-type"] == "audio/wav"
-    assert response.content == b"guitar-audio"
+    assert response.content == stem_file.read_bytes()
+
+
+def test_silent_stems_are_hidden(tmp_path: Path) -> None:
+    separator = FakeSeparator({"drums": 0.5, "piano": 0.0, "guitar": 0.5, "vocals": 0.001})
+    client = client_for(separator, tmp_path)
+    separation_id = upload(client)
+
+    body = client.get(f"/separations/{separation_id}").json()
+
+    assert body["stems"] == ["drums", "guitar"]
+    assert client.get(f"/separations/{separation_id}/stems/piano").status_code == 404
 
 
 def test_each_upload_gets_its_own_separation(client: TestClient) -> None:
