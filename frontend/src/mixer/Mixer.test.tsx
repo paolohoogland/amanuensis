@@ -86,6 +86,14 @@ describe('Mixer', () => {
     expect(screen.getByText('0:30 / 2:00')).toBeInTheDocument()
   })
 
+  it('shows readable stem names', () => {
+    render(<Mixer tracks={[{ name: 'guitar_1', url: '/stems/guitar_1' }]} />)
+
+    expect(screen.getByText('guitar 1')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Mute guitar 1' })).toBeInTheDocument()
+    expect(screen.getByLabelText('guitar 1 volume')).toBeInTheDocument()
+  })
+
   it('stops when the song ends', async () => {
     const user = userEvent.setup()
     render(<Mixer tracks={tracks} />)
