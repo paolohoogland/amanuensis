@@ -11,6 +11,7 @@ dependencies = [
     "fastapi>=0.143.2",
     "numpy>=2.4.6",
     "python-multipart>=0.0.32",
+    "scipy>=1.17.1",
     "uvicorn>=0.54.0",
 ]
 
@@ -20,6 +21,7 @@ dev = [
     "mypy>=1.13",
     "pytest>=8.3",
     "ruff>=0.8",
+    "scipy-stubs>=1.17.1.5",
 ]
 
 [build-system]
