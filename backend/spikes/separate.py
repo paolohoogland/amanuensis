@@ -23,13 +23,21 @@ def main() -> None:
     parser.add_argument("input", type=Path)
     parser.add_argument("--out", type=Path, default=Path("data/stems"))
     parser.add_argument("--model", default="htdemucs_6s")
+    parser.add_argument("--shifts", type=int, default=1)
+    parser.add_argument("--overlap", type=float, default=0.25)
     args = parser.parse_args()
 
     device = resolve_device(available_devices(), os.environ.get("AMANUENSIS_DEVICE"))
-    print(f"device: {device}  model: {args.model}  torch: {torch.__version__}")
+    print(f"device: {device}  model: {args.model}  shifts: {args.shifts}  overlap: {args.overlap}")
 
     started = time.perf_counter()
-    separator = Separator(model=args.model, device=str(device), progress=True)
+    separator = Separator(
+        model=args.model,
+        device=str(device),
+        shifts=args.shifts,
+        overlap=args.overlap,
+        progress=True,
+    )
     loaded = time.perf_counter()
     _, stems = separator.separate_audio_file(args.input)
     separated = time.perf_counter()
