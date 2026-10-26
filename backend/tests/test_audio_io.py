@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from amanuensis.audio_io import read_wav, write_wav
+from amanuensis.audio_io import mix_wavs, read_wav, write_wav
 from tests.wav import SAMPLE_RATE, write_tone
 
 
@@ -50,3 +50,16 @@ def test_rejects_audio_that_is_not_16_bit(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="16-bit"):
         read_wav(path)
+
+
+def test_mixes_wav_files_by_adding_their_samples(tmp_path: Path) -> None:
+    first = np.full((100, 2), 0.25, dtype=np.float32)
+    second = np.full((100, 2), -0.1, dtype=np.float32)
+    write_wav(tmp_path / "first.wav", SAMPLE_RATE, first)
+    write_wav(tmp_path / "second.wav", SAMPLE_RATE, second)
+
+    mix_wavs([tmp_path / "first.wav", tmp_path / "second.wav"], tmp_path / "mix.wav")
+
+    rate, mixed = read_wav(tmp_path / "mix.wav")
+    assert rate == SAMPLE_RATE
+    assert np.allclose(mixed, first + second, atol=1e-4)
