@@ -1,7 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createHttpApi, type Separation } from './api'
 
-const separation: Separation = { id: 'abc', status: 'queued', stems: [], error: null }
+const separation: Separation = {
+  id: 'abc',
+  status: 'queued',
+  stems: [],
+  background: null,
+  error: null,
+}
 
 function respondingWith(body: unknown, status = 200) {
   return vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(body), { status }))

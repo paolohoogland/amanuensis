@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createMix, isAudible, setVolume, toggleMute, toggleSolo } from './mix'
+import { anySoloed, createMix, isAudible, setVolume, toggleMute, toggleSolo } from './mix'
 
 const stems = ['drums', 'bass', 'guitar']
 
@@ -44,6 +44,11 @@ describe('mix', () => {
 
     expect(isAudible(mix, 'bass')).toBe(true)
     expect(isAudible(mix, 'guitar')).toBe(false)
+  })
+
+  it('knows when any stem is soloed', () => {
+    expect(anySoloed(createMix(stems))).toBe(false)
+    expect(anySoloed(toggleSolo(createMix(stems), 'bass'))).toBe(true)
   })
 
   it('keeps volume between 0 and 1', () => {

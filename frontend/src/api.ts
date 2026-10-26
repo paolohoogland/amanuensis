@@ -4,6 +4,7 @@ export type Separation = {
   id: string
   status: Status
   stems: string[]
+  background: string | null
   error: string | null
 }
 

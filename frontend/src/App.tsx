@@ -45,6 +45,9 @@ export default function App({ api, pollIntervalMs = 1000 }: Props) {
             name: stem,
             url: api.stemUrl(separation.id, stem),
           }))}
+          background={
+            separation.background ? api.stemUrl(separation.id, separation.background) : undefined
+          }
         />
       )}
     </main>

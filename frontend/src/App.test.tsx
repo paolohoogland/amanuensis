@@ -5,7 +5,7 @@ import App from './App'
 import type { Separation, SeparationApi } from './api'
 
 function separation(overrides: Partial<Separation> = {}): Separation {
-  return { id: 'abc', status: 'queued', stems: [], error: null, ...overrides }
+  return { id: 'abc', status: 'queued', stems: [], background: null, error: null, ...overrides }
 }
 
 function fakeApi(...updates: Separation[]): SeparationApi {
@@ -64,6 +64,17 @@ describe('App', () => {
     expect(screen.getByLabelText('drums audio')).toHaveAttribute(
       'src',
       '/separations/abc/stems/drums',
+    )
+  })
+
+  it('plays the background track with the stems', async () => {
+    await uploadSong(
+      fakeApi(separation({ status: 'done', stems: ['drums'], background: 'background' })),
+    )
+
+    expect(await screen.findByLabelText('background audio')).toHaveAttribute(
+      'src',
+      '/separations/abc/stems/background',
     )
   })
 
