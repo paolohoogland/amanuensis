@@ -10,9 +10,12 @@ export function createMix(stems: string[]): Mix {
   return Object.fromEntries(stems.map((stem) => [stem, { muted: false, soloed: false, volume: 1 }]))
 }
 
+export function anySoloed(mix: Mix): boolean {
+  return Object.values(mix).some((channel) => channel.soloed)
+}
+
 export function isAudible(mix: Mix, stem: string): boolean {
-  const anySoloed = Object.values(mix).some((channel) => channel.soloed)
-  return anySoloed ? mix[stem].soloed : !mix[stem].muted
+  return anySoloed(mix) ? mix[stem].soloed : !mix[stem].muted
 }
 
 export function toggleMute(mix: Mix, stem: string): Mix {

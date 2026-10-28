@@ -1,9 +1,11 @@
 from pathlib import Path
 
+import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
 from amanuensis.api import create_app
+from amanuensis.audio_io import read_wav
 from amanuensis.separation import SeparationService, Separator
 from tests.wav import write_tone
 
@@ -63,6 +65,7 @@ def test_finished_separation_lists_its_stems(client: TestClient) -> None:
         "id": separation_id,
         "status": "done",
         "stems": ["drums", "guitar"],
+        "background": None,
         "error": None,
     }
 
@@ -87,6 +90,21 @@ def test_silent_stems_are_hidden(tmp_path: Path) -> None:
 
     assert body["stems"] == ["drums", "guitar"]
     assert client.get(f"/separations/{separation_id}/stems/piano").status_code == 404
+
+
+def test_hidden_stems_play_together_as_a_background_track(tmp_path: Path) -> None:
+    separator = FakeSeparator({"drums": 0.5, "piano": 0.001, "guitar": 0.5, "other": 0.002})
+    client = client_for(separator, tmp_path)
+    separation_id = upload(client)
+
+    body = client.get(f"/separations/{separation_id}").json()
+    response = client.get(f"/separations/{separation_id}/stems/background")
+
+    stems_dir = tmp_path / "separations" / separation_id / "stems"
+    expected = read_wav(stems_dir / "piano.wav")[1] + read_wav(stems_dir / "other.wav")[1]
+    assert body["background"] == "background"
+    assert response.status_code == 200
+    assert np.allclose(read_wav(stems_dir / "background.wav")[1], expected, atol=1e-4)
 
 
 def test_each_upload_gets_its_own_separation(client: TestClient) -> None:

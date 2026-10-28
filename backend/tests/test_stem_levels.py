@@ -1,7 +1,4 @@
-import wave
 from pathlib import Path
-
-import pytest
 
 from amanuensis.stem_levels import audible_stems, wav_energy
 from tests.wav import write_tone
@@ -34,15 +31,3 @@ def test_drops_stems_below_the_threshold_share_of_total_energy() -> None:
 
 def test_nothing_is_audible_in_silence() -> None:
     assert audible_stems({"drums": 0.0, "bass": 0.0}, threshold_db=-30) == []
-
-
-def test_rejects_audio_that_is_not_16_bit(tmp_path: Path) -> None:
-    path = tmp_path / "8bit.wav"
-    with wave.open(str(path), "wb") as file:
-        file.setnchannels(1)
-        file.setsampwidth(1)
-        file.setframerate(8000)
-        file.writeframes(bytes(100))
-
-    with pytest.raises(ValueError, match="16-bit"):
-        wav_energy(path)

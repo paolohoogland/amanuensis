@@ -86,6 +86,41 @@ describe('Mixer', () => {
     expect(screen.getByText('0:30 / 2:00')).toBeInTheDocument()
   })
 
+  it('shows readable stem names', () => {
+    render(<Mixer tracks={[{ name: 'guitar_1', url: '/stems/guitar_1' }]} />)
+
+    expect(screen.getByText('guitar 1')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Mute guitar 1' })).toBeInTheDocument()
+    expect(screen.getByLabelText('guitar 1 volume')).toBeInTheDocument()
+  })
+
+  it('plays the background together with the stems', async () => {
+    const user = userEvent.setup()
+    render(<Mixer tracks={tracks} background="/stems/background" />)
+
+    await user.click(screen.getByRole('button', { name: 'Play' }))
+
+    expect(audio('background')).toHaveAttribute('src', '/stems/background')
+    expect(vi.mocked(HTMLMediaElement.prototype.play).mock.contexts).toContain(audio('background'))
+  })
+
+  it('has no channel controls for the background', () => {
+    render(<Mixer tracks={tracks} background="/stems/background" />)
+
+    expect(screen.queryByRole('button', { name: 'Mute background' })).not.toBeInTheDocument()
+  })
+
+  it('silences the background only while a stem is soloed', async () => {
+    const user = userEvent.setup()
+    render(<Mixer tracks={tracks} background="/stems/background" />)
+
+    await user.click(screen.getByRole('button', { name: 'Solo drums' }))
+    expect(audio('background').muted).toBe(true)
+
+    await user.click(screen.getByRole('button', { name: 'Solo drums' }))
+    expect(audio('background').muted).toBe(false)
+  })
+
   it('stops when the song ends', async () => {
     const user = userEvent.setup()
     render(<Mixer tracks={tracks} />)
